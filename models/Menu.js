@@ -26,6 +26,7 @@ mongoose.connection.once('open', async () => {
         const count = await MenuSchema.countDocuments();
         if (count === 0) {
             const defaultMenus = [
+                
                 { day: "monday", breakfast: "Pancakes", lunch: "Rice and curry", dinner: "Pizza" },
                 { day: "tuesday", breakfast: "Omelette", lunch: "Chicken sandwich", dinner: "Burger" },
                 { day: "wednesday", breakfast: "Toast", lunch: "Pasta", dinner: "Salad" },
