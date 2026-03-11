@@ -18,15 +18,12 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
 
-
 require('./config/passport')(passport);
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -61,7 +58,6 @@ app.use(
           "https://cdn.jsdelivr.net",
           "https://fastly.jsdelivr.net"
         ],
-       
         "frame-src": ["'self'", "https://*.razorpay.com"],
         "img-src": ["'self'", "data:", "https://*.razorpay.com"],
         "style-src": ["'self'", "'unsafe-inline'"],
@@ -89,14 +85,12 @@ app.use(
       sameSite: 'lax',
       secure: NODE_ENV === 'production',
     },
-    store:
-      new MongoStore({ mongooseConnection: mongoose.connection }),
+    store: new MongoStore({ mongooseConnection: mongoose.connection }),
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 
 app.use('/api/admin/:all', (req, res, next) => {
   if (req.isAuthenticated() && req.user?.email === process.env.ADMIN) return next();
@@ -108,7 +102,6 @@ app.use('/api/user/:all', (req, res, next) => {
   return res.sendStatus(401);
 });
 
-
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/data', require('./routes/data'));
 app.use('/api/admin', require('./routes/admin'));
@@ -116,7 +109,6 @@ app.use('/api/user', require('./routes/user'));
 
 app.use(express.static(FRONTEND_DIR));
 app.get('*', (req, res) => res.sendFile(FRONTEND_DIR + '/index.html'));
-
 
 app.listen(PORT, () => {
   console.log(`Server started on port ${PORT} (${NODE_ENV})`);
