@@ -35,7 +35,7 @@ router.get("/resetSecret", async (req, res) => {
 
 router.post("/checkCoupon", async (req, res) => {
   try { res.send(await Buyer.checkCoupon(req.body)); }
-  catch (e) { console.erro  r(e); res.status(500).send({ error: "Failed to check coupon" }); }
+  catch (e) { console.error(e); res.status(500).send({ error: "Failed to check coupon" }); }
 });
 
 router.get("/boughtNextWeek", async (req, res) => {
@@ -98,7 +98,7 @@ router.post("/checkOrder", async (req, res) => {
     if (!orderObj) return res.status(404).send({ ok: false, error: "Order not found" });
 
     await Buyer.saveOrder(req.user?.email, orderObj.selected);
-    // Optional cleanup: await Order.deleteOrder(razorpay_order_id);
+
 
     res.send(true);
   } catch (e) {
