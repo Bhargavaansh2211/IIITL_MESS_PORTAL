@@ -12,6 +12,7 @@ function toNumber(n, fallback = 0) {
   const x = Number(n);
   return Number.isFinite(x) ? x : fallback;
 }
+
 function calculateTotalFromSelection(selected, costsByMeal) {
   let total = 0;
   for (const val of Object.values(selected || {})) {
