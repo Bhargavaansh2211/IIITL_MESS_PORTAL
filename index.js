@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const compression = require('compression');
 const dotenv = require('dotenv');
-const passport = require('passport');   
+const passport = require('passport');
 const session = require('express-session');
 const helmet = require('helmet');
 
@@ -18,7 +18,6 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// DB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -93,9 +92,19 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use('/api/admin/:all', (req, res, next) => {
+  if (req.isAuthenticated() && req.user?.email === process.env.ADMIN) return next();
+  return res.sendStatus(401);
+});
+
+app.use('/api/user/:all', (req, res, next) => {
+  if (req.isAuthenticated()) return next();
+  return res.sendStatus(401);
+});
 
 app.use('/api/auth', require('./routes/auth'));
-
+app.use('/api/data', require('./routes/data'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/api/user', require('./routes/user'));
 
 app.use(express.static(FRONTEND_DIR));
