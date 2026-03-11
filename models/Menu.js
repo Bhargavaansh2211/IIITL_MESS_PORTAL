@@ -26,15 +26,49 @@ mongoose.connection.once('open', async () => {
         const count = await MenuSchema.countDocuments();
         if (count === 0) {
             const defaultMenus = [
-                
-                { day: "monday", breakfast: "Pancakes", lunch: "Rice and curry", dinner: "Pizza" },
-                { day: "tuesday", breakfast: "Omelette", lunch: "Chicken sandwich", dinner: "Burger" },
-                { day: "wednesday", breakfast: "Toast", lunch: "Pasta", dinner: "Salad" },
-                { day: "thursday", breakfast: "Cereal", lunch: "Steak", dinner: "Soup" },
-                { day: "friday", breakfast: "Bagel", lunch: "Fish and chips", dinner: "Fries" },
-                { day: "saturday", breakfast: "Eggs", lunch: "Sandwich", dinner: "Stew" },
-                { day: "sunday", breakfast: "Waffles", lunch: "Pasta", dinner: "Roast" }
-            ];
+    { 
+        day: "monday", 
+        breakfast: "Pav Bhaji, Milk and Bread", 
+        lunch: "Chole, Puri, Dahi, Rice", 
+        dinner: "Aloo Palwal, Arhar Dal, Rice, Roti, Salad" 
+    },
+    { 
+        day: "tuesday", 
+        breakfast: "Medu Vada with Sambhar, Milk and Bread", 
+        lunch: "Rajma, Rice, Roti", 
+        dinner: "Masala Bhindi, Arhar Dal, Rice, Roti, Salad" 
+    },
+    { 
+        day: "wednesday", 
+        breakfast: "Aloo Parantha with Curd, Milk and Bread", 
+        lunch: "Black Chana, Rice, Roti, Salad", 
+        dinner: "Kadhai Paneer, Rice, Roti, Salad, Halwa" 
+    },
+    { 
+        day: "thursday", 
+        breakfast: "Uttapam with Sambhar, Milk and Bread", 
+        lunch: "Punjabi Kadhi, Rice, Roti, Salad", 
+        dinner: "Lauki Kofta, Tehri, Roti, Salad" 
+    },
+    { 
+        day: "friday", 
+        breakfast: "Poha, Milk and Bread", 
+        lunch: "Masala Bhindi, Arhar Dal, Rice, Roti, Salad", 
+        dinner: "Aloo Matar Sabzi, Masoor Dal, Rice, Roti, Salad" 
+    },
+    { 
+        day: "saturday", 
+        breakfast: "Paratha with White Matar, Milk and Bread", 
+        lunch: "Chole Bhature, Rice, Boondi Raita", 
+        dinner: "Mix Veg, Arhar Dal, Rice, Roti, Salad" 
+    },
+    { 
+        day: "sunday", 
+        breakfast: "Idli with Sambhar, Milk and Bread", 
+        lunch: "Dal Makhni, Veg Biryani, Paratha, Salad", 
+        dinner: "Paneer Butter Masala, Rice, Roti, Salad, Ice Cream" 
+    }
+];
             await MenuSchema.insertMany(defaultMenus);
             console.log("Default menu data inserted");
         }
