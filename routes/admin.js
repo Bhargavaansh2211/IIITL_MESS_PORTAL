@@ -1,13 +1,12 @@
-// Import required modules
 const express = require("express");
 const router = express.Router();
 
-// Import database models
+
 const Menu = require('../models/Menu');
 const Time = require('../models/Time');
 const Buyer = require('../models/Buyer');
 
-// Set the time and cost of breakfast, lunch, dinner
+
 router.post(
     "/setTime",
     async (req, res) => {
@@ -16,7 +15,7 @@ router.post(
     }
 );
 
-// Set the weekly menu
+
 router.post(
     "/setMenu",
     async (req, res) => {
@@ -25,7 +24,7 @@ router.post(
     }
 );
 
-// Get the total meals that need to be cooked
+
 router.post(
     "/meals",
     async (req, res) => {
