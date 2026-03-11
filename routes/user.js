@@ -27,6 +27,21 @@ router.get("/data", async (req, res) => {
   catch (e) { console.error(e); res.status(500).send({ error: "Failed to fetch buyer data" }); }
 });
 
+router.get("/resetSecret", async (req, res) => {
+  try { res.send(await Buyer.resetSecret(req.user?.email)); }
+  catch (e) { console.error(e); res.status(500).send({ error: "Failed to reset secret" }); }
+}); 
+
+router.post("/checkCoupon", async (req, res) => {
+  try { res.send(await Buyer.checkCoupon(req.body)); }
+  catch (e) { console.erro  r(e); res.status(500).send({ error: "Failed to check coupon" }); }
+});
+
+router.get("/boughtNextWeek", async (req, res) => {
+  try { res.send(await Buyer.boughtNextWeek(req.user?.email)); }
+  catch (e) { console.error(e); res.status(500).send({ error: "Failed to fetch next week status" }); }
+});
+
 
 router.post("/createOrder", async (req, res) => {
   try {
