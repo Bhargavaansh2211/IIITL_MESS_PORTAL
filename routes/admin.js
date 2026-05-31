@@ -5,6 +5,9 @@ const router = express.Router();
 const Menu = require('../models/Menu');
 const Time = require('../models/Time');
 const Buyer = require('../models/Buyer');
+const DishRating = require('../models/DishRating');
+const CouponReminder = require('../services/couponReminder');
+const CouponRollover = require('../services/couponRollover');
 
 
 router.post(
@@ -56,6 +59,62 @@ router.post(
             { day: "sunday", breakfast: data.sunday.breakfast, lunch: data.sunday.lunch, dinner: data.sunday.dinner }
         ]
         res.send(processed);
+    }
+);
+
+router.get(
+    "/dishRatings",
+    async (req, res) => {
+        try {
+            const date = req.query?.date || new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+            const ratings = await DishRating.getRatingsForDate(date);
+
+            const summary = {
+                breakfast: { count: 0, average: 0 },
+                lunch: { count: 0, average: 0 },
+                dinner: { count: 0, average: 0 }
+            };
+            for (const row of ratings) {
+                summary[row.meal].count += 1;
+                summary[row.meal].average += row.rating;
+            }
+            for (const meal of Object.keys(summary)) {
+                if (summary[meal].count) {
+                    summary[meal].average = Number((summary[meal].average / summary[meal].count).toFixed(2));
+                }
+            }
+
+            res.send({ date, summary, ratings });
+        } catch (e) {
+            console.error(e);
+            res.status(500).send({ error: "Failed to fetch dish ratings" });
+        }
+    }
+);
+
+router.post(
+    "/sendCouponReminder",
+    async (req, res) => {
+        try {
+            const result = await CouponReminder.sendWeeklyCouponReminder({ force: true });
+            res.send(result);
+        } catch (e) {
+            console.error(e);
+            res.status(500).send({ error: "Failed to send coupon reminder" });
+        }
+    }
+);
+
+router.post(
+    "/rolloverCoupons",
+    async (req, res) => {
+        try {
+            const result = await CouponRollover.rolloverWeeklyCoupons({ force: true });
+            res.send(result);
+        } catch (e) {
+            console.error(e);
+            res.status(500).send({ error: "Failed to rollover coupons" });
+        }
     }
 );
 

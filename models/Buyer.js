@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const User = require("./User");
 
 const BuyerSchema = mongoose.model("buyer", new mongoose.Schema({
     email: { type: String, required: true },
@@ -79,6 +80,18 @@ const BuyerSchema = mongoose.model("buyer", new mongoose.Schema({
         }
     }
 }));
+
+function emptyWeek() {
+    return {
+        monday: { breakfast: false, lunch: false, dinner: false },
+        tuesday: { breakfast: false, lunch: false, dinner: false },
+        wednesday: { breakfast: false, lunch: false, dinner: false },
+        thursday: { breakfast: false, lunch: false, dinner: false },
+        friday: { breakfast: false, lunch: false, dinner: false },
+        saturday: { breakfast: false, lunch: false, dinner: false },
+        sunday: { breakfast: false, lunch: false, dinner: false }
+    };
+}
 
 // Get the user details 
 module.exports.getBuyer = async function (email) {
@@ -214,4 +227,31 @@ module.exports.boughtNextWeek = async function (email) {
 module.exports.allBuyers = async function () {
     const Buyers = await BuyerSchema.find({});
     return Buyers;
+}
+
+// Returns registered users who have not bought coupons for the coming week.
+module.exports.usersMissingNextWeekCoupon = async function () {
+    const boughtEmails = await BuyerSchema.distinct("email", { bought: true });
+    return await User.find({ email: { $nin: boughtEmails } })
+        .select({ _id: 0, displayName: 1, email: 1 });
+}
+
+// Move purchased next-week coupons into the active week and clear next-week state.
+module.exports.rolloverWeek = async function () {
+    const buyers = await BuyerSchema.find({});
+    const blankNextWeek = emptyWeek();
+
+    for (const buyer of buyers) {
+        const nextWeek = JSON.parse(JSON.stringify(buyer.next || blankNextWeek));
+        await BuyerSchema.updateOne(
+            { _id: buyer._id },
+            {
+                this: nextWeek,
+                next: blankNextWeek,
+                bought: false
+            }
+        );
+    }
+
+    return buyers.length;
 }

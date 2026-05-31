@@ -191,6 +191,28 @@ export default function AdminPanel() {
     useEffect(() => {
         fetchMenu();
     }, []);
+
+    const [dishRatings, setDishRatings] = useState([]);
+    const [dishSummary, setDishSummary] = useState([]);
+
+    const fetchDishRatings = async () => {
+        try {
+            const response = await axios.get(window.APIROOT + 'api/admin/dishRatings');
+            setDishRatings(response.data.ratings || []);
+            const summaryObj = response.data.summary || {};
+            setDishSummary([
+                { key: 'breakfast', meal: 'Breakfast', count: summaryObj.breakfast?.count || 0, average: summaryObj.breakfast?.average || 0 },
+                { key: 'lunch', meal: 'Lunch', count: summaryObj.lunch?.count || 0, average: summaryObj.lunch?.average || 0 },
+                { key: 'dinner', meal: 'Dinner', count: summaryObj.dinner?.count || 0, average: summaryObj.dinner?.average || 0 }
+            ]);
+        } catch (error) {
+            message.error('Failed to fetch dish ratings');
+        }
+    }
+
+    useEffect(() => {
+        fetchDishRatings();
+    }, []);
     
 
     return (
@@ -213,6 +235,36 @@ export default function AdminPanel() {
                         <Button loading={savingMenu} className={classes.buy} type='primary' size='large' icon={<SaveOutlined />} onClick={() => saveMenu()}>Save Changes</Button>
                     </div>
                 </Card> : null}
+            </motion.div>
+
+            <motion.div layout className={classes.adminBody}>
+                <Card size='small' className={classes.card}>
+                    <h1>TODAY DISH RATINGS</h1>
+                    <Table
+                        className={classes.table}
+                        dataSource={dishSummary}
+                        pagination={false}
+                        bordered
+                        columns={[
+                            { title: 'Meal', dataIndex: 'meal', key: 'meal' },
+                            { title: 'Total Ratings', dataIndex: 'count', key: 'count' },
+                            { title: 'Average Rating', dataIndex: 'average', key: 'average' }
+                        ]}
+                    />
+                    <Table
+                        className={classes.table}
+                        style={{ marginTop: '1rem' }}
+                        dataSource={dishRatings.map((r, i) => ({ key: i, ...r }))}
+                        pagination={{ pageSize: 10 }}
+                        bordered
+                        columns={[
+                            { title: 'Student', dataIndex: 'email', key: 'email' },
+                            { title: 'Meal', dataIndex: 'meal', key: 'meal' },
+                            { title: 'Dish', dataIndex: 'dish', key: 'dish' },
+                            { title: 'Rating', dataIndex: 'rating', key: 'rating' }
+                        ]}
+                    />
+                </Card>
             </motion.div>
         </>
     );

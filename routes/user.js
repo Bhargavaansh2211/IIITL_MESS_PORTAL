@@ -5,6 +5,8 @@ const Razorpay = require("razorpay");
 const Buyer = require("../models/Buyer");
 const Time = require("../models/Time");
 const Order = require("../models/Order");
+const Menu = require("../models/Menu");
+const DishRating = require("../models/DishRating");
 
 const { validatePaymentVerification } = require("razorpay/dist/utils/razorpay-utils");
 
@@ -104,6 +106,60 @@ router.post("/checkOrder", async (req, res) => {
   } catch (e) {
     console.error("checkOrder error:", e);
     res.status(500).send({ ok: false, error: "Failed to verify order" });
+  }
+});
+
+function getCurrentISTDateMeta() {
+  const now = new Date();
+  const day = now.toLocaleDateString("en-US", { weekday: "long", timeZone: "Asia/Kolkata" }).toLowerCase();
+  const date = now.toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  return { day, date };
+}
+
+router.get("/dishRatings/today", async (req, res) => {
+  try {
+    const { day, date } = getCurrentISTDateMeta();
+    const menu = await Menu.getMenu();
+    const dayMenu = menu.find((m) => m.day === day);
+    if (!dayMenu) return res.status(404).send({ error: "Menu not found for current day" });
+
+    const ratings = await DishRating.getUserRatingsForDate(req.user?.email, date);
+    const ratingsByMeal = {};
+    for (const r of ratings) ratingsByMeal[r.meal] = r.rating;
+
+    res.send({ day, date, dayMenu, ratings: ratingsByMeal });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: "Failed to fetch dish rating data" });
+  }
+});
+
+router.post("/dishRatings", async (req, res) => {
+  try {
+    const { meal, rating } = req.body || {};
+    const normalizedMeal = String(meal || "").toLowerCase();
+    const numericRating = Number(rating);
+    if (!["breakfast", "lunch", "dinner"].includes(normalizedMeal) || !Number.isInteger(numericRating) || numericRating < 1 || numericRating > 5) {
+      return res.status(400).send({ error: "Invalid meal or rating" });
+    }
+
+    const { day, date } = getCurrentISTDateMeta();
+    const menu = await Menu.getMenu();
+    const dayMenu = menu.find((m) => m.day === day);
+    if (!dayMenu) return res.status(404).send({ error: "Menu not found for current day" });
+
+    await DishRating.saveRating({
+      email: req.user?.email,
+      day,
+      meal: normalizedMeal,
+      dish: dayMenu[normalizedMeal],
+      rating: numericRating,
+      date
+    });
+    res.send({ ok: true });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send({ error: "Failed to save rating" });
   }
 });
 

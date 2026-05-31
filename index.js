@@ -8,6 +8,8 @@ const session = require('express-session');
 const helmet = require('helmet');
 
 const MongoStore = require('connect-mongo')(session);
+const { startCouponReminderScheduler } = require('./services/couponReminder');
+const { startCouponRolloverScheduler } = require('./services/couponRollover');
 dotenv.config({ path: './config/config.env' });
 
 const PORT = process.env.PORT || 3000;
@@ -21,6 +23,11 @@ app.set('trust proxy', 1);
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+});
+
+mongoose.connection.once('open', () => {
+  startCouponReminderScheduler();
+  startCouponRolloverScheduler();
 });
 
 require('./config/passport')(passport);
@@ -102,10 +109,12 @@ app.use('/api/user/:all', (req, res, next) => {
   return res.sendStatus(401);
 });
 
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/data', require('./routes/data'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/user', require('./routes/user'));
+app.use('/api/user/gemini', require('./routes/gemini'));
 
 app.use(express.static(FRONTEND_DIR));
 app.get('*', (req, res) => res.sendFile(FRONTEND_DIR + '/index.html'));
